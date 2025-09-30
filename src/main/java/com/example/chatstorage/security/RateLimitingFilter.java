@@ -1,10 +1,6 @@
 package com.example.chatstorage.security;
 
 import com.example.chatstorage.config.RateLimitProperties;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Bucket4j;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +21,8 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     private static final Set<String> WHITELISTED_PATHS = Set.of("/actuator/health", "/health");
 
     private final RateLimitProperties properties;
-    private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final Map<String, RateLimitWindow> cache = new ConcurrentHashMap<>();
+    private final Duration windowDuration = Duration.ofMinutes(1);
 
     public RateLimitingFilter(RateLimitProperties properties) {
         this.properties = properties;
@@ -35,8 +32,9 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String key = request.getHeader(API_KEY_HEADER);
-        Bucket bucket = cache.computeIfAbsent(key != null ? key : request.getRemoteAddr(), this::newBucket);
-        if (bucket.tryConsume(1)) {
+        String identifier = (key != null && !key.isBlank()) ? key : request.getRemoteAddr();
+        RateLimitWindow window = cache.computeIfAbsent(identifier, this::newWindow);
+        if (window.tryConsume()) {
             filterChain.doFilter(request, response);
         } else {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
@@ -45,13 +43,45 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         }
     }
 
-    private Bucket newBucket(String key) {
-        Bandwidth limit = Bandwidth.classic(properties.getRequestsPerMinute(), Refill.greedy(properties.getRequestsPerMinute(), Duration.ofMinutes(1)));
-        return Bucket4j.builder().addLimit(limit).build();
+    private RateLimitWindow newWindow(String key) {
+        return new RateLimitWindow(properties.getRequestsPerMinute(), windowDuration);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return WHITELISTED_PATHS.contains(request.getRequestURI());
+    }
+
+    private static final class RateLimitWindow {
+        private final int limit;
+        private final long windowSizeMillis;
+        private long windowStart;
+        private int count;
+
+        private RateLimitWindow(int limit, Duration windowDuration) {
+            this.limit = limit;
+            this.windowSizeMillis = windowDuration.toMillis();
+            this.windowStart = System.currentTimeMillis();
+            this.count = 0;
+        }
+
+        private synchronized boolean tryConsume() {
+            if (limit <= 0) {
+                return false;
+            }
+
+            long now = System.currentTimeMillis();
+            if (now - windowStart >= windowSizeMillis) {
+                windowStart = now;
+                count = 0;
+            }
+
+            if (count < limit) {
+                count++;
+                return true;
+            }
+
+            return false;
+        }
     }
 }
