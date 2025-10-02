@@ -44,43 +44,43 @@ public class ChatSessionController {
     }
 
     @GetMapping("/sessions")
-    public List<ChatSessionResponse> listSessions(@RequestParam String userId) {
+    public List<ChatSessionResponse> listSessions(@RequestParam("userId") String userId) {
         return chatSessionService.listSessions(userId);
     }
 
     @PutMapping("/sessions/{sessionId}/rename")
-    public ChatSessionResponse renameSession(@PathVariable UUID sessionId,
-                                             @RequestParam String userId,
+    public ChatSessionResponse renameSession(@PathVariable("sessionId") UUID sessionId,
+                                             @RequestParam("userId") String userId,
                                              @Valid @RequestBody ChatSessionRenameRequest request) {
         return chatSessionService.renameSession(sessionId, userId, request.getTitle());
     }
 
     @PutMapping("/sessions/{sessionId}/favorite")
-    public ChatSessionResponse updateFavorite(@PathVariable UUID sessionId,
-                                              @RequestParam String userId,
+    public ChatSessionResponse updateFavorite(@PathVariable("sessionId") UUID sessionId,
+                                              @RequestParam("userId") String userId,
                                               @Valid @RequestBody ChatSessionFavoriteRequest request) {
         return chatSessionService.updateFavorite(sessionId, userId, request.getFavorite());
     }
 
     @DeleteMapping("/sessions/{sessionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteSession(@PathVariable UUID sessionId, @RequestParam String userId) {
+    public void deleteSession(@PathVariable("sessionId") UUID sessionId, @RequestParam("userId") String userId) {
         chatSessionService.deleteSession(sessionId, userId);
     }
 
     @PostMapping("/sessions/{sessionId}/messages")
     @ResponseStatus(HttpStatus.CREATED)
-    public ChatMessageResponse addMessage(@PathVariable UUID sessionId,
-                                          @RequestParam String userId,
+    public ChatMessageResponse addMessage(@PathVariable("sessionId") UUID sessionId,
+                                          @RequestParam("userId") String userId,
                                           @Valid @RequestBody ChatMessageCreateRequest request) {
         return chatMessageService.addMessage(sessionId, userId, request);
     }
 
     @GetMapping("/sessions/{sessionId}/messages")
-    public PagedResponse<ChatMessageResponse> getMessages(@PathVariable UUID sessionId,
-                                                          @RequestParam String userId,
-                                                          @RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "20") int size) {
+    public PagedResponse<ChatMessageResponse> getMessages(@PathVariable("sessionId") UUID sessionId,
+                                                          @RequestParam("userId") String userId,
+                                                          @RequestParam(name = "page", defaultValue = "0") int page,
+                                                          @RequestParam(name = "size", defaultValue = "20") int size) {
         return chatMessageService.getMessages(sessionId, userId, page, size);
     }
 }

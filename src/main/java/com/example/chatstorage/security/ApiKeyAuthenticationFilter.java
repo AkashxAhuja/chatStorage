@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String API_KEY_HEADER = "X-API-KEY";
-    private static final Set<String> WHITELISTED_PATHS = Set.of("/actuator/health", "/health");
+    private static final Set<String> WHITELISTED_PATHS = Set.of("/actuator/health", "/health", "/swagger-ui.html",
+            "/v3/api-docs", "/v3/api-docs/swagger-config", "/swagger-ui/index.html");
 
     private final Set<String> allowedApiKeys;
 
