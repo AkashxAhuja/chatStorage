@@ -72,8 +72,8 @@ All endpoints require a valid `X-API-KEY` header (except health checks). Swagger
 | --- | --- |
 | `POST /api/v1/sessions` | Create a session. Body: `{ "userId": "user-123", "title": "My chat" }` |
 | `GET /api/v1/sessions?userId={id}` | List sessions for a user. |
-| `PUT /api/v1/sessions/{sessionId}/rename?userId={id}` | Rename a session. Body: `{ "title": "New name" }` |
-| `PUT /api/v1/sessions/{sessionId}/favorite?userId={id}` | Toggle favorites. Body: `{ "favorite": true }` |
+| `PATCH /api/v1/sessions/{sessionId}/rename?userId={id}` | Rename a session. Body: `{ "title": "New name" }` |
+| `PATCH /api/v1/sessions/{sessionId}/favorite?userId={id}` | Toggle favorites. Body: `{ "favorite": true }` |
 | `DELETE /api/v1/sessions/{sessionId}?userId={id}` | Delete a session and its messages. |
 
 ### Message Management

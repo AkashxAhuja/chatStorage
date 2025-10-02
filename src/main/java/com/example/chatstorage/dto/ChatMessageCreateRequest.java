@@ -3,6 +3,7 @@ package com.example.chatstorage.dto;
 import com.example.chatstorage.domain.SenderType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public class ChatMessageCreateRequest {
 
@@ -10,8 +11,10 @@ public class ChatMessageCreateRequest {
     private SenderType sender;
 
     @NotBlank
+    @Size(max = 5000)
     private String content;
 
+    @Size(max = 5000)
     private String context;
 
     public SenderType getSender() {
