@@ -5,19 +5,27 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String API_KEY_HEADER = "X-API-KEY";
-    private static final Set<String> WHITELISTED_PATHS = Set.of("/actuator/health", "/health", "/swagger-ui.html",
-            "/v3/api-docs", "/v3/api-docs/swagger-config", "/swagger-ui/index.html");
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
+    private static final List<String> WHITELIST_PATTERNS = List.of(
+            "/", "/error",
+            "/health", "/actuator/**",
+            "/swagger-ui.html", "/swagger-ui/**",
+            "/v3/api-docs", "/v3/api-docs/**", "/v3/api-docs.yaml"
+    );
 
     private final Set<String> allowedApiKeys;
 
@@ -46,6 +54,9 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return WHITELISTED_PATHS.contains(request.getRequestURI());
+        if (HttpMethod.OPTIONS.matches(request.getMethod()))
+            return true;
+        String path = request.getRequestURI(); // or request.getServletPath()
+        return WHITELIST_PATTERNS.stream().anyMatch(p -> PATH_MATCHER.match(p, path));
     }
 }
