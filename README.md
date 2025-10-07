@@ -6,8 +6,8 @@ A production-ready Spring Boot microservice that persists Retrieval-Augmented Ge
 
 - Create, list, rename, favorite/unfavorite, and delete chat sessions.
 - Persist chat messages with sender attribution and optional retrieved context.
-- API key authentication supporting multiple keys and centralized error responses.
-- Configurable rate limiting powered by Bucket4j.
+- Short-lived API key authentication with Base64-encoded keys and centralized error responses.
+- Configurable per-key rate limiting and expiration windows.
 - Global exception handling, structured logging, and CORS configuration.
 - Health check endpoints (`/health`, `/actuator/health`).
 - OpenAPI/Swagger documentation with API key security scheme.
@@ -33,8 +33,9 @@ Key variables:
 
 | Variable | Description |
 | --- | --- |
-| `SECURITY_API_KEYS` | Comma-separated list of allowed API keys. |
-| `RATE_LIMIT_REQUESTS_PER_MINUTE` | Allowed requests per API key per minute. |
+| `SECURITY_API_KEY_SECRET` | Static string mixed with the timestamp when generating API keys. |
+| `KEY_EXPIRATION_MS` | Lifetime of generated API keys in milliseconds. |
+| `RATE_LIMIT_REQUESTS_PER_MINUTE` | Maximum requests allowed per API key before it is invalidated. |
 | `SPRING_DATASOURCE_*` | JDBC connection details for PostgreSQL. |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed origins for CORS. |
 | `POSTGRES_*` | Credentials used by the PostgreSQL container. |
@@ -64,7 +65,13 @@ Services exposed:
 
 ## API Reference
 
-All endpoints require a valid `X-API-KEY` header (except health checks). Swagger UI documents the full contract.
+All endpoints require a valid `X-API-KEY` header (except health checks and key generation). Swagger UI documents the full contract.
+
+### API Key Management
+
+| Method & Path | Description |
+| --- | --- |
+| `POST /api/v1/api-keys` | Generate a new short-lived API key. Response includes the Base64 key and its expiration timestamp. |
 
 ### Session Management
 

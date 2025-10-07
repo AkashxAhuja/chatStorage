@@ -1,7 +1,6 @@
 package com.example.chatstorage.config;
 
-import com.example.chatstorage.security.ApiKeyAuthenticationFilter;
-import com.example.chatstorage.security.RateLimitingFilter;
+import com.example.chatstorage.security.ApiKeyInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,30 +8,29 @@ import org.springframework.core.Ordered;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
 @Configuration
-public class WebConfig {
+public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public FilterRegistrationBean<ApiKeyAuthenticationFilter> apiKeyFilter(SecurityProperties securityProperties) {
-        FilterRegistrationBean<ApiKeyAuthenticationFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new ApiKeyAuthenticationFilter(securityProperties));
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
-        return registrationBean;
+    private final CorsProperties corsProperties;
+    private final ApiKeyInterceptor apiKeyInterceptor;
+
+    public WebConfig(CorsProperties corsProperties, ApiKeyInterceptor apiKeyInterceptor) {
+        this.corsProperties = corsProperties;
+        this.apiKeyInterceptor = apiKeyInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(apiKeyInterceptor);
     }
 
     @Bean
-    public FilterRegistrationBean<RateLimitingFilter> rateLimitingFilter(RateLimitProperties properties) {
-        FilterRegistrationBean<RateLimitingFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new RateLimitingFilter(properties));
-        registrationBean.setOrder(Ordered.HIGHEST_PRECEDENCE + 2);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter(CorsProperties corsProperties) {
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
