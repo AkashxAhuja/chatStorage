@@ -24,10 +24,11 @@ logging:
     com.example.chatstorage: DEBUG
 
 security:
-  api-keys: ${SECURITY_API_KEYS:demo-key-1,demo-key-2}
+  api-key-secret: ${SECURITY_API_KEY_SECRET:chatstorage}
+  key-expiration-ms: ${KEY_EXPIRATION_MS:60000}
 
 ratelimit:
-  requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:60}
+  requests-per-minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:10}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

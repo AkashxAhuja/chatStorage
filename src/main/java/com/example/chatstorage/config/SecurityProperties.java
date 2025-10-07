@@ -1,19 +1,26 @@
 package com.example.chatstorage.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-@ConfigurationProperties(prefix = "security")
+@Component
 public class SecurityProperties {
 
-    private List<String> apiKeys;
+    private final String apiKeySecret;
+    private final long keyExpirationMs;
 
-    public List<String> getApiKeys() {
-        return apiKeys;
+    public SecurityProperties(
+            @Value("${SECURITY_API_KEY_SECRET:chatstorage}") String apiKeySecret,
+            @Value("${KEY_EXPIRATION_MS:60000}") long keyExpirationMs) {
+        this.apiKeySecret = apiKeySecret;
+        this.keyExpirationMs = keyExpirationMs;
     }
 
-    public void setApiKeys(List<String> apiKeys) {
-        this.apiKeys = apiKeys;
+    public String getApiKeySecret() {
+        return apiKeySecret;
+    }
+
+    public long getKeyExpirationMs() {
+        return keyExpirationMs;
     }
 }

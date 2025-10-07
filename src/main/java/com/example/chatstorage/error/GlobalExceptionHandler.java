@@ -1,5 +1,9 @@
 package com.example.chatstorage.error;
 
+import com.example.chatstorage.security.exception.ApiKeyExpiredException;
+import com.example.chatstorage.security.exception.ApiKeyRateLimitExceededException;
+import com.example.chatstorage.security.exception.InvalidApiKeyException;
+import com.example.chatstorage.security.exception.MissingApiKeyException;
 import com.example.chatstorage.service.ResourceNotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +26,26 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler(MissingApiKeyException.class)
+    public ResponseEntity<ApiError> handleMissingApiKey(MissingApiKeyException ex, ServletWebRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "MISSING_API_KEY", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidApiKeyException.class)
+    public ResponseEntity<ApiError> handleInvalidApiKey(InvalidApiKeyException ex, ServletWebRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "INVALID_API_KEY", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ApiKeyExpiredException.class)
+    public ResponseEntity<ApiError> handleExpiredApiKey(ApiKeyExpiredException ex, ServletWebRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "API_KEY_EXPIRED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ApiKeyRateLimitExceededException.class)
+    public ResponseEntity<ApiError> handleRateLimitExceeded(ApiKeyRateLimitExceededException ex, ServletWebRequest request) {
+        return buildResponse(HttpStatus.TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED", ex.getMessage(), request);
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException ex, ServletWebRequest request) {
