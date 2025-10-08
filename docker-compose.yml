@@ -26,10 +26,10 @@ services:
       - ./logs:/var/log/chatstorage
     restart: unless-stopped
     logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "5
+     driver: json-file
+     options:
+      max-size: "10m"
+      max-file: "5
 
   adminer:
     image: adminer:4
