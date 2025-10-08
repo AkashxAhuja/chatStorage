@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+    <Properties>
+        <Property name="LOG_DIR">${env:LOG_DIR:-/var/log/chatstorage}</Property>
+        <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1} - %msg%n</Property>
+    </Properties>
+
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1} - %msg%n"/>
+            <PatternLayout pattern="${PATTERN}"/>
         </Console>
 
         <RollingFile name="RequestFile"
-                     fileName="logs/request.log"
-                     filePattern="logs/request-%d{yyyy-MM-dd}-%i.log.gz">
+                     fileName="${LOG_DIR}/request.log"
+                     filePattern="${LOG_DIR}/request-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -16,8 +21,8 @@
         </RollingFile>
 
         <RollingFile name="ResponseFile"
-                     fileName="logs/response.log"
-                     filePattern="logs/response-%d{yyyy-MM-dd}-%i.log.gz">
+                     fileName="${LOG_DIR}/response.log"
+                     filePattern="${LOG_DIR}/response-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -26,8 +31,8 @@
         </RollingFile>
 
         <RollingFile name="ErrorFile"
-                     fileName="logs/error.log"
-                     filePattern="logs/error-%d{yyyy-MM-dd}-%i.log.gz">
+                     fileName="${LOG_DIR}/error.log"
+                     filePattern="${LOG_DIR}/error-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n%throwable"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -51,6 +56,7 @@
 
         <Root level="info">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="ErrorFile" level="error"/>
         </Root>
     </Loggers>
 </Configuration>

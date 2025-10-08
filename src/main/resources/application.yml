@@ -19,9 +19,10 @@ server:
   shutdown: graceful
 
 logging:
+  config: classpath:log4j2-spring.xml
   level:
     root: INFO
-    com.example.chatstorage: DEBUG
+    com.example.chatstorage: INFO
 
 security:
   api-key-secret: ${SECURITY_API_KEY_SECRET:chatstorage}

@@ -19,8 +19,17 @@ services:
     env_file: .env
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/chatdb}
+      LOG_DIR: /var/log/chatstorage
     ports:
       - "8080:8080"
+    volumes:
+      - ./logs:/var/log/chatstorage
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5
 
   adminer:
     image: adminer:4
